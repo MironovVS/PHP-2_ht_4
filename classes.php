@@ -2,71 +2,107 @@
 
 class Article
 {
-	var $id;
-	var $title;
-	var $content;
-	
-	function __construct($id, $title, $content)
+	public $id;
+	public $title;
+	public $content;
+
+//Для всех типов статей добавить новый атрибут:
+//$preview. В нём будет храниться короткое описание
+//статьи, полученное из первых 15 символов содержимого статьи.
+//Сделать так, чтобы при создании экземпляров статей этот атрибут
+//заполнялся данными автоматически.
+	protected $preview;
+
+public function __construct($id, $title, $content)
 	{
 		$this->id = $id;
 		$this->title = $title;
 		$this->content = $content;
+		$this->preview=mb_substr($content, 0, 15);
 	}
-	
+
 	//  Функция для вывода статьи
-	function view()
+public function view()
 	{
-		echo "<h1>$this->title</h1><p>$this->content</p>";
+		echo "<h3>$this->title</a></h3><p>$this->preview</p>";
 	}
 }
 
 class NewsArticle extends Article
 {
-	var $datetime;
+	public $datetime;
 
-	function __construct($id, $title, $content)
+public function __construct($id, $title, $content)
 	{
 		parent::__construct($id, $title, $content);
 		$this->datetime = time();
-	}
+			}
 	
 	//  Функция для вывода статьи
-	function view()
+public function view()
 	{
-		echo "<h1>$this->title</h1><span style='color: red'>".
+		echo "<h3>$this->title</h3><span style='color: red'>".
 				strftime('%d.%m.%y', $this->datetime).
-				" <b>Новость</b></span><p>$this->content</p>";
+				" <b>Новость</b></span><p>$this->preview</p>";
 	}
 }
 
 class CrossArticle extends Article
 {
-	var $source;
-	
-	function __construct($id, $title, $content, $source)
+	public $source;
+
+public function __construct($id, $title, $content, $source)
 	{
 		parent::__construct($id, $title, $content);
 		$this->source = $source;
 	}
 
-	function view()
+public function view()
 	{
 		parent::view();
 		echo '<small>'.$this->source.'</small>';
 	}
 }
 
+class imageArticle extends Article
+{
+	public $image;
+
+public function __construct($id, $title, $content, $image)
+	{
+		parent::__construct($id, $title, $content);
+		$this->image = $image;
+	}
+
+public function view()
+	{
+		parent::view();
+		echo '<small>'.$this->image.'</small>';
+	}
+}
+
 class ArticleList
 {
-	var $alist;
-	
-	function add(Article $article)
+	protected $alist;
+
+public function add(Article $article)
 	{
 		$this->alist[] = $article;
 	}
-	
+
+	//В класс ArticleList добавить метод,
+	// который будет удалять из списка
+	// статью по её идентификатору (атрибут $id)
+	public function delete($id){
+		foreach($this -> alist as $key => $article){
+			if($article == $id){
+				unset($this -> alist[$key]);
+			}
+		}
+	}
+
 	//  Вывод статей
-	function view()
+public function view()
 	{
 		foreach($this->alist as $article)
 		{
@@ -75,4 +111,21 @@ class ArticleList
 		}
 	}
 }
+
+
+//Создать потомок класса ArticleList,
+//который будет выводить статьи в обратном порядке,
+//а не в том, в котором статьи были добавлены.
+class Reverse extends ArticleList
+{
+	public function view()
+	{
+		krsort($this->alist);
+		foreach ($this->alist as $article) {
+			$article->view();
+			echo "<hr>";
+		}
+	}
+}
+
 ?>
